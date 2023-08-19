@@ -9,9 +9,18 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let mut default_fields = vec![];
     let mut field_names = vec![];
     let mut methods = vec![];
+    // Commandのフィールド
+    let mut assign_fields = vec![];
+    // Command を文字列に変換して、lowercaseにして、format_ident!()でASTに戻す
+    let lower_name = format_ident!("{}", name.to_string().to_lowercase());
+
     for field in input.fields {
         let ty = field.ty;
         let field_name = field.ident;
+
+        assign_fields.push(quote! {
+            #field_name: self.#field_name.ok_or(format!("not found {}", stringify!(#field_name)))?
+        });
 
         field_names.push(quote! {
             println!("{}", stringify!(#field_name));
@@ -23,7 +32,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 self
             }
         });
-        
+
         let x = quote! {
             #field_name: Option<#ty>
         };
@@ -59,6 +68,13 @@ pub fn derive(input: TokenStream) -> TokenStream {
         // #builder_name is the struct name(CommandBuilder)
         impl #builder_name {
             #(#methods)*
+
+            fn build(self) -> Result<#name, Box<dyn std::error::Error>> {
+                let #lower_name = #name {
+                    #(#assign_fields),*
+                };
+                Ok(#lower_name)
+            }
         }
     };
     tokens.into()
