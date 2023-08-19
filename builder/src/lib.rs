@@ -8,35 +8,45 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let mut fields = vec![];
     let mut default_fields = vec![];
     let mut field_names = vec![];
+    let mut methods = vec![];
     for field in input.fields {
         let ty = field.ty;
-        let ident = field.ident;
+        let field_name = field.ident;
 
         field_names.push(quote! {
-            println!("{}", stringify!(#ident));
+            println!("{}", stringify!(#field_name));
         });
 
+        methods.push(quote! {
+            fn #field_name(&mut self, #field_name: #ty) -> &mut Self {
+                self.#field_name = Some(#field_name);
+                self
+            }
+        });
+        
         let x = quote! {
-            #ident: Option<#ty>
+            #field_name: Option<#ty>
         };
         fields.push(x);
 
         let y = quote! {
-            #ident: None
+            #field_name: None
         };
         default_fields.push(y);
     }
 
-    let builer_name = format_ident!("{}Builder", name);
+    let builder_name = format_ident!("{}Builder", name);
     let tokens = quote! {
 
-        pub struct #builer_name {
+        pub struct #builder_name {
             #(#fields),*
         }
 
+        // #name is the struct name(Command)
         impl #name {
-            pub fn builder() -> #builer_name {
-                #builer_name {
+            pub fn builder() -> #builder_name {
+                // #builder_name is the struct name(CommandBuilder)
+                #builder_name {
                     #(#default_fields),*
                 }
             }
@@ -44,6 +54,11 @@ pub fn derive(input: TokenStream) -> TokenStream {
             pub fn println() {
                 #(#field_names)*
             }
+        }
+
+        // #builder_name is the struct name(CommandBuilder)
+        impl #builder_name {
+            #(#methods)*
         }
     };
     tokens.into()
