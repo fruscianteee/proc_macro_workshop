@@ -7,9 +7,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let name = input.ident;
     let mut fields = vec![];
     let mut default_fields = vec![];
+    let mut field_names = vec![];
     for field in input.fields {
         let ty = field.ty;
         let ident = field.ident;
+
+        field_names.push(quote! {
+            println!("{}", stringify!(#ident));
+        });
+
         let x = quote! {
             #ident: Option<#ty>
         };
@@ -33,6 +39,10 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 #builer_name {
                     #(#default_fields),*
                 }
+            }
+
+            pub fn println() {
+                #(#field_names)*
             }
         }
     };
