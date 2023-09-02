@@ -29,9 +29,9 @@ path = "tests/04-call-build.rs"
 name = "tests5"
 path = "tests/05-method-chaining.rs"
 
-# [[test]]
-# name = "tests6"
-# path = "tests/06-optional-fields.rs"
+[[test]]
+name = "tests6"
+path = "tests/06-optional-field.rs"
 
 # [[test]]
 # name = "tests7"

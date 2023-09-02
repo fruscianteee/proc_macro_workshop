@@ -16,6 +16,9 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     for field in input.fields {
         let ty = field.ty;
+        for tree in ty.to_token_stream() {
+            eprintln!("{:?}", tree);
+        }
         let field_name = field.ident;
 
         assign_fields.push(quote! {
