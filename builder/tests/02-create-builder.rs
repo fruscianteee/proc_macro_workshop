@@ -52,6 +52,7 @@ pub struct Command {
     current_dir: String,
 }
 
+#[test]
 fn main() {
     let builder = Command::builder();
     Command::println();

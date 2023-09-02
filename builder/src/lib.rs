@@ -19,7 +19,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         let field_name = field.ident;
 
         assign_fields.push(quote! {
-            #field_name: self.#field_name.ok_or(format!("not found {}", stringify!(#field_name)))?
+            #field_name: self.#field_name.clone().ok_or(format!("not found {}", stringify!(#field_name)))?
         });
 
         field_names.push(quote! {
@@ -69,7 +69,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         impl #builder_name {
             #(#methods)*
 
-            fn build(self) -> Result<#name, Box<dyn std::error::Error>> {
+            fn build(&self) -> Result<#name, Box<dyn std::error::Error>> {
                 let #lower_name = #name {
                     #(#assign_fields),*
                 };

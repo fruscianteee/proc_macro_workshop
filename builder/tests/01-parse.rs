@@ -31,4 +31,5 @@ pub struct Command {
     current_dir: String,
 }
 
+#[test]
 fn main() {}
