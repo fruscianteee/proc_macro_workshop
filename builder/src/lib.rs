@@ -1,5 +1,25 @@
 use proc_macro::TokenStream;
 use quote::*;
+use syn::Type;
+
+fn get_typepath_in_option(ty: &Type) -> Option<Type> {
+    match ty {
+        Type::Path(ref typepath) => {
+            let Some(seg) = typepath.path.segments.first() else { return None };
+            if seg.ident == "Option" {
+                if let syn::PathArguments::AngleBracketed(ref inner_ty) = seg.arguments {
+                    if let Some(syn::GenericArgument::Type(ty)) = inner_ty.args.first() {
+                        return Some(ty.clone());
+                    }
+                }
+                None
+            } else {
+                None
+            }
+        }
+        _ => None,
+    }
+}
 
 #[proc_macro_derive(Builder)]
 pub fn derive(input: TokenStream) -> TokenStream {
@@ -7,7 +27,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let name = input.ident;
     let mut fields = vec![];
     let mut default_fields = vec![];
-    let mut field_names = vec![];
     let mut methods = vec![];
     // Commandのフィールド
     let mut assign_fields = vec![];
@@ -15,19 +34,25 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let lower_name = format_ident!("{}", name.to_string().to_lowercase());
 
     for field in input.fields {
-        let ty = field.ty;
-        for tree in ty.to_token_stream() {
-            eprintln!("{:?}", tree);
+        let mut ty = field.ty;
+        let inner_ty = get_typepath_in_option(&ty);
+        if let Some(ref inner_ty) = inner_ty {
+            ty = inner_ty.clone();
         }
+
         let field_name = field.ident;
 
-        assign_fields.push(quote! {
-            #field_name: self.#field_name.clone().ok_or(format!("not found {}", stringify!(#field_name)))?
-        });
+        let assign_field = if inner_ty.is_some() {
+            quote! {
+                #field_name: self.#field_name.clone()
+            }
+        } else {
+            quote! {
+                #field_name: self.#field_name.clone().ok_or(format!("not found {}", stringify!(#field_name)))?
+            }
+        };
 
-        field_names.push(quote! {
-            println!("{}", stringify!(#field_name));
-        });
+        assign_fields.push(assign_field);
 
         methods.push(quote! {
             fn #field_name(&mut self, #field_name: #ty) -> &mut Self {
@@ -49,7 +74,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
     let builder_name = format_ident!("{}Builder", name);
     let tokens = quote! {
-
         pub struct #builder_name {
             #(#fields),*
         }
@@ -61,10 +85,6 @@ pub fn derive(input: TokenStream) -> TokenStream {
                 #builder_name {
                     #(#default_fields),*
                 }
-            }
-
-            pub fn println() {
-                #(#field_names)*
             }
         }
 
