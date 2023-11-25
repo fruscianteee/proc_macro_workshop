@@ -33,9 +33,9 @@ path = "tests/05-method-chaining.rs"
 name = "tests6"
 path = "tests/06-optional-field.rs"
 
-# [[test]]
-# name = "tests7"
-# path = "tests/07-repeated-field.rs"
+[[test]]
+name = "tests7"
+path = "tests/07-repeated-field.rs"
 
 
 # [[test]]
