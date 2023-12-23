@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::*;
-use syn::{parenthesized, Expr, Lit, LitStr, Meta, Path, Type};
+use syn::{Expr, Lit, Path, Type};
 
 // Option<syn::Type> から syn::Type を取り出す
 // Type::Path(
@@ -52,13 +52,13 @@ pub fn derive(input: TokenStream) -> TokenStream {
     let lower_name = format_ident!("{}", structure_name.to_string().to_lowercase());
 
     for field in input.fields {
-        let mut ty = field.ty;
-        let inner_ty = get_type_in(&ty, "Option");
+        let mut ty = field.ty; // ty = Option<String>
+        let inner_ty = get_type_in(&ty, "Option"); // innner_ty = String
         if let Some(ref inner_ty) = inner_ty {
             ty = inner_ty.clone();
-        }
+        } // ty = String
 
-        let field_name = field.ident;
+        let field_name = field.ident; // executable
 
         let assign_field = if inner_ty.is_some() {
             quote! {
@@ -66,7 +66,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
             }
         } else {
             quote! {
-                #field_name: self.#field_name.clone().ok_or(format!("not found {}", stringify!(#field_name)))?
+                #field_name: self.#field_name.clone().unwrap_or_default()
             }
         };
 
@@ -84,10 +84,12 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
         let mut generated_method = false;
         for attr in attrs {
-            let inner_ty = get_type_in(&ty, "Vec");
-            let Some(ref inner_ty) = inner_ty else {
-                panic!("field {} is not Vec", field_name.unwrap());
-            };
+            let inner_ty = get_type_in(&ty, "Vec").unwrap_or_else(|| {
+                panic!(
+                    "field {} is not Vec",
+                    field_name.clone().expect("field name is none")
+                )
+            });
 
             let tokenstream = attr.meta.to_token_stream();
             let meta: syn::MetaList = syn::parse(tokenstream.into()).unwrap();
@@ -99,14 +101,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
                     let x: Path = lit_str.parse().unwrap();
                     let method_ident = x.get_ident().unwrap();
 
-                    dbg!(&method_ident.into_token_stream());
-
                     methods.push(quote! {
                         fn #method_ident(&mut self, x: #inner_ty) -> &mut Self {
-                            if self.#field_name.is_none() {
-                                self.#field_name = Some(x);
+                            if let Some(#field_name) = self.#field_name.as_mut() {
+                                #field_name.push(x);
+                            } else {
+                                self.#field_name = Some(vec![x]);
                             }
-                            self.#field_name.push(x);
+                            //self.#field_name.push(x);
                             self
                         }
                     });
@@ -127,6 +129,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         let field = quote! {
             #field_name: Option<#ty>
         };
+
         fields.push(field);
     }
 
