@@ -62,6 +62,7 @@ pub struct Command {
     current_dir: Option<String>,
 }
 
+#[test]
 fn main() {
     let command = Command::builder()
         .executable("cargo".to_owned())
