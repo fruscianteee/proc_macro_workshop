@@ -11,7 +11,6 @@ pub struct Command {
     current_dir: String,
 }
 
-#[test]
 fn main() {
     let command = Command::builder()
         .executable("cargo".to_owned())

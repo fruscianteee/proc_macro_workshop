@@ -8,39 +8,42 @@ publish = false
 [lib]
 proc-macro = true
 
-
 [[test]]
-name = "tests1"
-path = "tests/01-parse.rs"
+name = "tests"
+path = "tests/progress.rs"
 
-[[test]]
-name = "tests2"
-path = "tests/02-create-builder.rs"
-
-[[test]]
-name = "tests3"
-path = "tests/03-call-setters.rs"
-
-[[test]]
-name = "tests4"
-path = "tests/04-call-build.rs"
-
-[[test]]
-name = "tests5"
-path = "tests/05-method-chaining.rs"
-
-[[test]]
-name = "tests6"
-path = "tests/06-optional-field.rs"
-
-[[test]]
-name = "tests7"
-path = "tests/07-repeated-field.rs"
-
-
-# [[test]]
-# name = "tests8"
-# path = "tests/08-unrecognized-attribute.rs"
+#[[test]]
+#name = "tests1"
+#path = "tests/01-parse.rs"
+#
+#[[test]]
+#name = "tests2"
+#path = "tests/02-create-builder.rs"
+#
+#[[test]]
+#name = "tests3"
+#path = "tests/03-call-setters.rs"
+#
+#[[test]]
+#name = "tests4"
+#path = "tests/04-call-build.rs"
+#
+#[[test]]
+#name = "tests5"
+#path = "tests/05-method-chaining.rs"
+#
+#[[test]]
+#name = "tests6"
+#path = "tests/06-optional-field.rs"
+#
+#[[test]]
+#name = "tests7"
+#path = "tests/07-repeated-field.rs"
+#
+#
+#[[test]]
+#name = "tests8"
+#path = "tests/08-unrecognized-attribute.rs"
 
 # [[test]]
 # name = "tests9"

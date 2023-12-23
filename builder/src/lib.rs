@@ -96,6 +96,14 @@ pub fn derive(input: TokenStream) -> TokenStream {
             let meta: syn::MetaNameValue =
                 syn::parse(meta.tokens.to_token_stream().into()).unwrap();
 
+            if meta.path.get_ident().unwrap().to_string().as_str() != "each" {
+                let span = syn::Error::new_spanned(
+                    attr.meta.to_token_stream(),
+                    r#"expected `builder(each = "...")`"#,
+                );
+                return span.into_compile_error().into();
+            }
+
             if let Expr::Lit(expr) = &meta.value {
                 if let Lit::Str(lit_str) = &expr.lit {
                     let x: Path = lit_str.parse().unwrap();

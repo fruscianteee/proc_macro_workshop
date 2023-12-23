@@ -46,7 +46,6 @@ pub struct Command {
 //     }
 // }
 
-#[test]
 fn main() {
     let mut builder = Command::builder();
     builder.executable("cargo".to_owned());
