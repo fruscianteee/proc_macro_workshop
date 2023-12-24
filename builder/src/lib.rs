@@ -135,7 +135,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         }
 
         let field = quote! {
-            #field_name: Option<#ty>
+            #field_name: std::option::Option<#ty>
         };
 
         fields.push(field);
@@ -160,7 +160,7 @@ pub fn derive(input: TokenStream) -> TokenStream {
         impl #builder_name {
             #(#methods)*
 
-            fn build(&self) -> Result<#structure_name, Box<dyn std::error::Error>> {
+            fn build(&self) -> std::result::Result<#structure_name, std::boxed::Box<dyn std::error::Error>> {
                 let #lower_name = #structure_name {
                     #(#fields_for_build),*
                 };
